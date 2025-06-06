@@ -110,11 +110,11 @@ export class LetterboxedSolver {
    * The big kahuna - let's find some actual solutions!
    * This uses backtracking, which is basically "try everything until something works"
    */
-  findSolutions(maxSolutions = 50) {
+  findSolutions(maxSolutions = 20) {
     const solutions = [];
-    const maxDepth = 8; // Don't go crazy with super long solution chains
+    const maxDepth = 10; // Allow for longer solution chains
     const startTime = Date.now();
-    const timeLimit = 10000; // Give up after 10 seconds - we're not running a supercomputer here
+    const timeLimit = 15000; // Give it more time - 15 seconds
     
     const backtrack = (currentWords, usedLetters, lastLetter, depth) => {
       // Are we taking too long? Time to bail out
@@ -143,10 +143,16 @@ export class LetterboxedSolver {
       const sortedWords = possibleWords.sort((a, b) => {
         const aNewLetters = [...a].filter(letter => !usedLetters.has(letter)).length;
         const bNewLetters = [...b].filter(letter => !usedLetters.has(letter)).length;
-        return bNewLetters - aNewLetters;
+        // Prioritize words with more new letters, but also consider word length
+        const aScore = aNewLetters * 2 + a.length;
+        const bScore = bNewLetters * 2 + b.length;
+        return bScore - aScore;
       });
       
-      for (let word of sortedWords) {
+      // Try more words, especially if we're early in the search
+      const wordsToTry = depth < 3 ? sortedWords.slice(0, 50) : sortedWords.slice(0, 30);
+      
+      for (let word of wordsToTry) {
         const newUsedLetters = new Set(usedLetters);
         let hasNewLetter = false;
         
@@ -158,8 +164,10 @@ export class LetterboxedSolver {
           newUsedLetters.add(letter);
         }
         
-        // Only try words that actually help us progress
-        if (hasNewLetter && newUsedLetters.size <= 12) {
+        // Be more flexible - try words even if they don't add new letters sometimes
+        const shouldTry = hasNewLetter || (depth === 0) || (usedLetters.size > 8);
+        
+        if (shouldTry && newUsedLetters.size <= 12) {
           currentWords.push(word);
           backtrack(
             currentWords,

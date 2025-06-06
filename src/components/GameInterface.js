@@ -5,9 +5,9 @@ import './GameInterface.css';
 
 const GameInterface = () => {
   const [sides, setSides] = useState([
-    ['T', 'E', 'R'],
-    ['A', 'S', 'I'], 
-    ['N', 'O', 'L'],
+    ['S', 'A', 'T'],
+    ['E', 'R', 'N'], 
+    ['O', 'I', 'L'],
     ['D', 'M', 'G']
   ]);
   
