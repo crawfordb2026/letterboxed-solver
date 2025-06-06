@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/letterboxed-solver/static/css/main.7e97a826.css",
-    "main.js": "/letterboxed-solver/static/js/main.b70eb6b6.js",
+    "main.css": "/letterboxed-solver/static/css/main.2e6d158b.css",
+    "main.js": "/letterboxed-solver/static/js/main.9875e02f.js",
     "index.html": "/letterboxed-solver/index.html",
-    "main.7e97a826.css.map": "/letterboxed-solver/static/css/main.7e97a826.css.map",
-    "main.b70eb6b6.js.map": "/letterboxed-solver/static/js/main.b70eb6b6.js.map"
+    "main.2e6d158b.css.map": "/letterboxed-solver/static/css/main.2e6d158b.css.map",
+    "main.9875e02f.js.map": "/letterboxed-solver/static/js/main.9875e02f.js.map"
   },
   "entrypoints": [
-    "static/css/main.7e97a826.css",
-    "static/js/main.b70eb6b6.js"
+    "static/css/main.2e6d158b.css",
+    "static/js/main.9875e02f.js"
   ]
 }
