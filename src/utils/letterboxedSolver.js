@@ -144,8 +144,8 @@ export class LetterboxedSolver {
         const aNewLetters = [...a].filter(letter => !usedLetters.has(letter)).length;
         const bNewLetters = [...b].filter(letter => !usedLetters.has(letter)).length;
         // Prioritize words with more new letters, but also consider word length
-        const aScore = aNewLetters * 2 + a.length;
-        const bScore = bNewLetters * 2 + b.length;
+        const aScore = aNewLetters * 3 + a.length;
+        const bScore = bNewLetters * 3 + b.length;
         return bScore - aScore;
       });
       
@@ -210,40 +210,154 @@ export class LetterboxedSolver {
 
   /**
    * Want a new puzzle? Let me whip one up for you!
-   * I'll make sure there are enough vowels so it's actually solvable
+   * I'll make sure there are enough vowels and common consonants so it's actually solvable
    */
   static generateRandomPuzzle() {
+    // First, let's try some known solvable puzzles
+    const knownSolvablePuzzles = [
+      [['T', 'E', 'R'], ['A', 'S', 'I'], ['N', 'O', 'L'], ['D', 'M', 'G']],
+      [['P', 'A', 'R'], ['E', 'D', 'I'], ['N', 'T', 'O'], ['S', 'L', 'M']],
+      [['B', 'U', 'S'], ['E', 'A', 'R'], ['N', 'T', 'I'], ['L', 'O', 'D']],
+      [['C', 'A', 'T'], ['E', 'R', 'S'], ['N', 'O', 'I'], ['L', 'D', 'M']],
+      [['F', 'I', 'R'], ['E', 'A', 'D'], ['N', 'O', 'T'], ['S', 'L', 'M']],
+      [['G', 'A', 'M'], ['E', 'R', 'S'], ['T', 'O', 'I'], ['N', 'L', 'D']],
+      [['H', 'A', 'R'], ['E', 'S', 'T'], ['I', 'O', 'N'], ['L', 'D', 'M']],
+      [['M', 'A', 'R'], ['E', 'S', 'I'], ['T', 'O', 'N'], ['L', 'D', 'G']],
+      [['W', 'A', 'R'], ['E', 'S', 'T'], ['I', 'O', 'N'], ['L', 'D', 'M']],
+      [['L', 'A', 'R'], ['E', 'S', 'T'], ['I', 'O', 'N'], ['D', 'M', 'G']]
+    ];
+    
+    // 70% chance to use a known solvable puzzle
+    if (Math.random() < 0.7) {
+      const randomPuzzle = knownSolvablePuzzles[Math.floor(Math.random() * knownSolvablePuzzles.length)];
+      return randomPuzzle.map(side => [...side]); // Deep copy
+    }
+    
+    // Otherwise, generate a new one and test it
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      const puzzle = this.generateRandomLetterCombination();
+      
+      // Quick solvability test - just check if we have enough valid words
+      const testSolver = new LetterboxedSolver(puzzle);
+      if (testSolver.validWords.length >= 20) {
+        // Quick test for potential solutions - try for 2 seconds
+        const quickStartTime = Date.now();
+        const quickTimeLimit = 2000;
+        let foundSolution = false;
+        
+        const quickBacktrack = (depth, usedLetters, lastLetter) => {
+          if (Date.now() - quickStartTime > quickTimeLimit) return false;
+          if (depth > 5) return false;
+          if (usedLetters.size === 12) {
+            foundSolution = true;
+            return true;
+          }
+          
+          const possibleWords = lastLetter 
+            ? testSolver.getWordsStartingWith(lastLetter)
+            : testSolver.validWords;
+          
+          const sortedWords = possibleWords
+            .filter(word => {
+              const newLetters = [...word].filter(letter => !usedLetters.has(letter)).length;
+              return newLetters > 0;
+            })
+            .sort((a, b) => {
+              const aNew = [...a].filter(letter => !usedLetters.has(letter)).length;
+              const bNew = [...b].filter(letter => !usedLetters.has(letter)).length;
+              return bNew - aNew;
+            })
+            .slice(0, 10);
+          
+          for (let word of sortedWords) {
+            const newUsedLetters = new Set(usedLetters);
+            for (let letter of word) newUsedLetters.add(letter);
+            
+            if (quickBacktrack(depth + 1, newUsedLetters, word[word.length - 1])) {
+              return true;
+            }
+          }
+          return false;
+        };
+        
+        if (quickBacktrack(0, new Set(), null) || foundSolution) {
+          console.log(`Generated new solvable puzzle after ${attempts + 1} attempts`);
+          return puzzle;
+        }
+      }
+      
+      attempts++;
+    }
+    
+    // If we can't generate a good one, fall back to a known solvable puzzle
+    console.log('Falling back to known solvable puzzle');
+    const fallback = knownSolvablePuzzles[Math.floor(Math.random() * knownSolvablePuzzles.length)];
+    return fallback.map(side => [...side]);
+  }
+  
+  /**
+   * Generate a random letter combination (helper method)
+   */
+  static generateRandomLetterCombination() {
     const vowels = ['A', 'E', 'I', 'O', 'U'];
-    const consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+    // Use more common consonants that appear in many words
+    const commonConsonants = ['R', 'T', 'N', 'S', 'L', 'C', 'D', 'P', 'M', 'H', 'G', 'F', 'Y', 'W', 'B', 'V', 'K'];
+    const lessCommonConsonants = ['J', 'X', 'Q', 'Z'];
     
     const sides = [[], [], [], []];
     const usedLetters = new Set();
     
     // First, let's put at least one vowel on each side - trust me, you'll need them
+    const shuffledVowels = [...vowels].sort(() => Math.random() - 0.5);
     for (let sideIndex = 0; sideIndex < 4; sideIndex++) {
-      let vowel;
-      do {
-        vowel = vowels[Math.floor(Math.random() * vowels.length)];
-      } while (usedLetters.has(vowel));
-      
-      sides[sideIndex].push(vowel);
-      usedLetters.add(vowel);
-    }
-    
-    // Now fill in the rest with consonants
-    for (let sideIndex = 0; sideIndex < 4; sideIndex++) {
-      while (sides[sideIndex].length < 3) {
-        let letter;
-        do {
-          letter = consonants[Math.floor(Math.random() * consonants.length)];
-        } while (usedLetters.has(letter));
-        
-        sides[sideIndex].push(letter);
-        usedLetters.add(letter);
+      const vowel = shuffledVowels[sideIndex % vowels.length];
+      if (!usedLetters.has(vowel)) {
+        sides[sideIndex].push(vowel);
+        usedLetters.add(vowel);
+      } else {
+        // Find an unused vowel
+        for (let v of vowels) {
+          if (!usedLetters.has(v)) {
+            sides[sideIndex].push(v);
+            usedLetters.add(v);
+            break;
+          }
+        }
       }
     }
     
-    // Mix them up a bit so the vowels aren't all in the same spot
+    // Add one common consonant to each side
+    const shuffledCommon = [...commonConsonants].sort(() => Math.random() - 0.5);
+    for (let sideIndex = 0; sideIndex < 4; sideIndex++) {
+      for (let consonant of shuffledCommon) {
+        if (!usedLetters.has(consonant)) {
+          sides[sideIndex].push(consonant);
+          usedLetters.add(consonant);
+          break;
+        }
+      }
+    }
+    
+    // Fill remaining spots with a mix of common and less common consonants
+    const allConsonants = [...commonConsonants, ...lessCommonConsonants];
+    const shuffledAll = allConsonants.sort(() => Math.random() - 0.5);
+    
+    for (let sideIndex = 0; sideIndex < 4; sideIndex++) {
+      while (sides[sideIndex].length < 3) {
+        for (let letter of shuffledAll) {
+          if (!usedLetters.has(letter)) {
+            sides[sideIndex].push(letter);
+            usedLetters.add(letter);
+            break;
+          }
+        }
+      }
+    }
+    
+    // Mix them up a bit so similar letters aren't always in the same positions
     sides.forEach(side => {
       for (let i = side.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

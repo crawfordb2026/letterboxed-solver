@@ -5,9 +5,9 @@ import './GameInterface.css';
 
 const GameInterface = () => {
   const [sides, setSides] = useState([
-    ['S', 'A', 'T'],
-    ['E', 'R', 'N'], 
-    ['O', 'I', 'L'],
+    ['T', 'E', 'R'],
+    ['A', 'S', 'I'], 
+    ['N', 'O', 'L'],
     ['D', 'M', 'G']
   ]);
   
@@ -22,6 +22,13 @@ const GameInterface = () => {
   const [hints, setHints] = useState([]);
   const [showHints, setShowHints] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customSides, setCustomSides] = useState([
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', '']
+  ]);
 
   // Initialize solver when sides change
   useEffect(() => {
@@ -127,6 +134,53 @@ const GameInterface = () => {
     setSides(newSides);
   };
 
+  const handleCustomLetterChange = (sideIndex, letterIndex, value) => {
+    const newCustomSides = [...customSides];
+    newCustomSides[sideIndex][letterIndex] = value.toUpperCase().slice(0, 1);
+    setCustomSides(newCustomSides);
+  };
+
+  const handleApplyCustomPuzzle = () => {
+    // Validate the custom puzzle
+    const allLetters = customSides.flat().filter(letter => letter.trim() !== '');
+    
+    if (allLetters.length !== 12) {
+      alert('Please enter exactly 12 letters (3 letters per side)');
+      return;
+    }
+    
+    const uniqueLetters = new Set(allLetters);
+    if (uniqueLetters.size !== 12) {
+      alert('All 12 letters must be unique');
+      return;
+    }
+    
+    // Check that each side has 3 letters
+    for (let i = 0; i < 4; i++) {
+      const sideLetters = customSides[i].filter(letter => letter.trim() !== '');
+      if (sideLetters.length !== 3) {
+        alert(`Side ${i + 1} must have exactly 3 letters`);
+        return;
+      }
+    }
+    
+    // Apply the custom puzzle
+    const validatedSides = customSides.map(side => 
+      side.map(letter => letter.toUpperCase())
+    );
+    setSides(validatedSides);
+    setShowCustomInput(false);
+  };
+
+  const handleClearCustomPuzzle = () => {
+    setCustomSides([
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', '']
+    ]);
+  };
+
   const handleSolve = async () => {
     if (!solver) return;
     
@@ -174,6 +228,9 @@ const GameInterface = () => {
         <div className="game-controls">
           <button onClick={handleNewPuzzle} className="control-button">
             New Puzzle
+          </button>
+          <button onClick={() => setShowCustomInput(true)} className="control-button custom-button">
+            Custom Puzzle
           </button>
           <button 
             onClick={handleSolve} 
@@ -304,6 +361,48 @@ const GameInterface = () => {
           )}
         </div>
       </div>
+      
+      {showCustomInput && (
+        <div className="modal-overlay">
+          <div className="custom-input-modal">
+            <h3>Create Custom Puzzle</h3>
+            <p>Enter 3 letters for each side of the box (12 unique letters total)</p>
+            
+            <div className="custom-sides-container">
+              {['Top', 'Right', 'Bottom', 'Left'].map((sideName, sideIndex) => (
+                <div key={sideIndex} className="custom-side">
+                  <label>{sideName} Side:</label>
+                  <div className="custom-letters">
+                    {[0, 1, 2].map((letterIndex) => (
+                      <input
+                        key={letterIndex}
+                        type="text"
+                        maxLength="1"
+                        value={customSides[sideIndex][letterIndex]}
+                        onChange={(e) => handleCustomLetterChange(sideIndex, letterIndex, e.target.value)}
+                        className="letter-input"
+                        placeholder="?"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="custom-input-controls">
+              <button onClick={handleApplyCustomPuzzle} className="control-button apply-button">
+                Apply Puzzle
+              </button>
+              <button onClick={handleClearCustomPuzzle} className="control-button clear-button">
+                Clear All
+              </button>
+              <button onClick={() => setShowCustomInput(false)} className="control-button cancel-button">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

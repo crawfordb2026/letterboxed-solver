@@ -62,6 +62,11 @@
   box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
 }
 
+.custom-button {
+  background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+  box-shadow: 0 4px 15px rgba(159, 122, 234, 0.3);
+}
+
 .game-content {
   display: flex;
   gap: 2rem;
@@ -387,4 +392,114 @@
   .letters-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Custom Puzzle Input Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.custom-input-modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.custom-input-modal h3 {
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.custom-input-modal p {
+  margin: 0 0 1.5rem 0;
+  color: #4a5568;
+  text-align: center;
+}
+
+.custom-sides-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.custom-side {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-side label {
+  font-weight: 600;
+  color: #2d3748;
+  min-width: 80px;
+}
+
+.custom-letters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.letter-input {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  background: white;
+  color: #2d3748;
+}
+
+.letter-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: scale(1.05);
+}
+
+.letter-input:hover {
+  border-color: #cbd5e0;
+}
+
+.custom-input-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.apply-button {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.clear-button {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+}
+
+.cancel-button {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
 } 
